@@ -160,7 +160,7 @@ public:
                                                   PlainMultiplyFilterType,
                                                   MatrixVectorMultiplyFilterType>::type MultiplyWithWeightsFilterType;
 
-//  typedef rtk::LaplacianImageFilter<TOutputImage, GradientImageType>      LaplacianFilterType;
+  typedef rtk::LaplacianImageFilter<TOutputImage, GradientImageType>      LaplacianFilterType;
 
   typedef typename TOutputImage::Pointer                                  OutputImagePointer;
 
@@ -176,8 +176,8 @@ public:
 
   /** Set the geometry of both m_BackProjectionFilter and m_ForwardProjectionFilter */
   itkSetConstObjectMacro(Geometry, ThreeDCircularProjectionGeometry)
-  
-  /** Perform laplacian-based and/or Tikhonov regularization during 
+
+  /** Perform laplacian-based and/or Tikhonov regularization during
   *  reconstruction (gamma is the strength of laplacian the regularization) */
   itkSetMacro(Gamma, float)
   itkGetMacro(Gamma, float)
@@ -191,6 +191,14 @@ protected:
   /** Does the real work. */
   void GenerateData() ITK_OVERRIDE;
 
+  template < typename ImageType >
+  typename std::enable_if< std::is_same< TSingleComponentImage, ImageType >::value, ImageType >::type::Pointer
+  ConnectGradientRegularization();
+
+  template < typename ImageType >
+  typename std::enable_if< !std::is_same< TSingleComponentImage, ImageType >::value, ImageType >::type::Pointer
+  ConnectGradientRegularization();
+
   /** Member pointers to the filters used internally (for convenience)*/
   BackProjectionFilterPointer                       m_BackProjectionFilter;
   ForwardProjectionFilterPointer                    m_ForwardProjectionFilter;
@@ -199,12 +207,12 @@ protected:
   typename ConstantSourceType::Pointer              m_ConstantVolumeSource;
   typename MultiplyFilterType::Pointer              m_MultiplyOutputVolumeFilter;
   typename MultiplyFilterType::Pointer              m_MultiplyInputVolumeFilter;
-//  typename MultiplyFilterType::Pointer              m_MultiplyLaplacianFilter;
+  typename MultiplyFilterType::Pointer              m_MultiplyLaplacianFilter;
   typename MultiplyFilterType::Pointer              m_MultiplyTikhonovFilter;
   typename AddFilterType::Pointer                   m_AddLaplacianFilter;
   typename AddFilterType::Pointer                   m_AddTikhonovFilter;
-//  typename LaplacianFilterType::Pointer             m_LaplacianFilter;
-  typename MultiplyWithWeightsFilterType::Pointer  m_MultiplyWithWeightsFilter;
+  typename LaplacianFilterType::Pointer             m_LaplacianFilter;
+  typename MultiplyWithWeightsFilterType::Pointer   m_MultiplyWithWeightsFilter;
 
   /** Member attributes */
   rtk::ThreeDCircularProjectionGeometry::ConstPointer    m_Geometry;
